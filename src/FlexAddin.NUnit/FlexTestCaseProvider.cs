@@ -65,7 +65,7 @@ namespace FlexAddin.NUnit
             foreach (var row in GetRows(method))
             {
                 // need an instance of the fixture for the Source Function
-                var fixture = CreateTestFixture(method);
+                var fixture = TestFixtureActivator.GetTestFixture(suite);
                 IEnumerable<TestCaseData> baseTestCases = GetBaseTestCases(row, fixture);
 
                 foreach (var testCase in baseTestCases)
@@ -144,21 +144,6 @@ namespace FlexAddin.NUnit
         {
             var attributes = method.GetCustomAttributes(typeof(TAttribute), false);
             return attributes.Cast<TAttribute>();
-        }
-
-        private object CreateTestFixture(MethodInfo testMethod)
-        {
-            var ctors = testMethod.DeclaringType.GetConstructors();
-
-            foreach (var ctor in ctors)
-            {
-                if (!ctor.GetParameters().Any())
-                {
-                    return Activator.CreateInstance(testMethod.DeclaringType);
-                }
-            }
-            // this is awkward - I feel like there must be a better way to handle this...
-            throw new FlexAddinException("Cannot create an instance of the fixture. Must have a default constructor.");
         }
 
         #endregion
